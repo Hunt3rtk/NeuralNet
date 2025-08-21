@@ -620,7 +620,7 @@ GameObject:
   - component: {fileID: 6775943176388438609}
   - component: {fileID: 6775943176388438610}
   m_Layer: 0
-  m_Name: Circle
+  m_Name: Cell
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -677,6 +677,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 22d8ce32a52acce4a8d15fa3ecd29985, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  visionRange: 5
+  visionAngle: 45
+  visionResolution: 5
 --- !u!1 &8285237295087276810
 GameObject:
   m_ObjectHideFlags: 0

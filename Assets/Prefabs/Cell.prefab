@@ -14,8 +14,9 @@ GameObject:
   - component: {fileID: 5219855417577782006}
   - component: {fileID: 7686861872828798231}
   - component: {fileID: 145363679952578874}
+  - component: {fileID: -1464799000934171661}
   m_Layer: 0
-  m_Name: Circle
+  m_Name: Cell
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -222,6 +223,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   speed: 5
+  rotationSpeed: 50
 --- !u!58 &7686861872828798231
 CircleCollider2D:
   m_ObjectHideFlags: 0
@@ -270,3 +272,18 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1296b352f79ed614ead6e2206dcea067, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+--- !u!114 &-1464799000934171661
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 463484581419805721}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 22d8ce32a52acce4a8d15fa3ecd29985, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  visionRange: 5
+  visionAngle: 45
+  visionResolution: 5
