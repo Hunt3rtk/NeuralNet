@@ -1,9 +1,8 @@
-using System.Threading.Tasks;
 using UnityEngine;
 
 public class Brain : MonoBehaviour
 {
-    class Neuron
+    public class Neuron
     {
         public float[] weights;
         public float bias;
@@ -17,14 +16,28 @@ public class Brain : MonoBehaviour
 
     public float ReLU(float a) => a > 0 ? a : 0;
 
+    public double ReLUDerivative(float a) => a > 0 ? 1.0 : 0.0;
+
+    [HideInInspector]
+    [SerializeField]
     private Neuron[][] neuralNet;
 
+    [HideInInspector]
+    [SerializeField]
     private Neuron[] outputLayer = new Neuron[2]; // Assuming 2 outputs for movement direction
 
     [SerializeField]
     private int depth = 3; // Number of layers in the neural network
 
-    private int neuronsPerLayer = 7; // Number of neurons in each layer
+    [SerializeField]
+    private float learningStep = 0.01f; // Learning rate for backpropagation
+
+    [SerializeField]
+    private int neuronsPerLayer = 8; // Number of neurons in each layer
+
+    [HideInInspector]
+    [SerializeField]
+    private bool isInitialized = false;
 
     private Movement movement;
 
@@ -39,6 +52,8 @@ public class Brain : MonoBehaviour
         {
             Debug.LogError("Movement component not found: " + e.Message);
         }
+
+        if (isInitialized) return;
 
         // Initialize the brain, e.g., load weights, biases, etc.
         neuralNet = new Neuron[depth][];
@@ -73,12 +88,15 @@ public class Brain : MonoBehaviour
             float bias = Random.Range(-1f, 1f);
             outputLayer[i] = new Neuron(weights, bias);
         }
+
+        isInitialized = true;
     }
 
     public void InitializeForwardPass(float[][] inputOneHot)
     {
-        float[] output = new float[neuronsPerLayer];
-        for (int i = 0; i < neuronsPerLayer; i++)
+
+        float[] output = new float[neuralNet.Length];
+        for (int i = 0; i < neuralNet.Length; i++)
         {
 
 
@@ -91,7 +109,6 @@ public class Brain : MonoBehaviour
             {
                 for (int k = 0; k < inputOneHot[j].Length; k++)
                 {
-
                     // Assuming inputOneHot[k] is a one-hot encoded vector
                     sum[i] += inputOneHot[j][k] * neuralNet[0][i].weights[k];
                 }
@@ -130,7 +147,7 @@ public class Brain : MonoBehaviour
         }
         return output[depth - 1];
     }
-    
+
     private void OutputResults(float[] lastInput)
     {
         float[] output = new float[outputLayer.Length];
@@ -157,5 +174,57 @@ public class Brain : MonoBehaviour
         {
             Debug.LogWarning("Movement component is not assigned.");
         }
+    }
+
+    public void Mutate()
+    {  
+        for (int i = 0; i < depth; i++)
+        {
+            for (int j = 0; j < neuronsPerLayer; j++)
+            {
+                // Randomly initialize weights and biases
+                for (int k = 0; k < neuralNet[i][j].weights.Length; k++)
+                {
+                    neuralNet[i][j].weights[k] += Random.Range(-.5f, .5f);
+                }
+
+                neuralNet[i][j].bias += Random.Range(-.5f, .5f);
+            }
+        }
+
+
+        // Initialize the output layer
+        for (int i = 0; i < outputLayer.Length; i++)
+        {
+            // Randomly initialize weights and biases for the output layer
+            for (int j = 0; j < outputLayer[i].weights.Length; j++)
+            {
+                outputLayer[i].weights[j] += Random.Range(-.5f, .5f);   
+            }
+
+            outputLayer[i].bias +=  Random.Range(-.5f, .5f);
+        }
+    }
+
+    public Neuron[][] GetNeuralNet()
+    {
+        return neuralNet;
+    }
+
+    public Neuron[][] SetNeuralNet(Neuron[][] newNet)
+    {
+        neuralNet = newNet;
+        return neuralNet;
+    }
+
+    public Neuron[] GetOutputLayer()
+    {
+        return outputLayer;
+    }
+
+    public Neuron[] SetOutputLayer(Neuron[] newLayer)
+    {
+        outputLayer = newLayer;
+        return outputLayer;
     }
 }

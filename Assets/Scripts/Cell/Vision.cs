@@ -1,6 +1,4 @@
 using System;
-using Unity.VisualScripting;
-using UnityEditor;
 using UnityEngine;
 
 public class Vision : MonoBehaviour
@@ -13,7 +11,9 @@ public class Vision : MonoBehaviour
     private int visionResolution = 5; // Default resolution
 
     // Array to hold one-hot encoded inputs for each ray
-    // The second dimension will be of the one hot encoded vector which will be [distance, rotation, plant, cell, bigger, smaller, wall]
+    // The second dimension will be of the one hot encoded vector which will be [time, distance, rotation, plant, cell, bigger, smaller, wall]
+    [HideInInspector]
+    [SerializeField]
     private float[][] inputOneHot;
 
     private int tickCount = 0;
@@ -33,7 +33,7 @@ public class Vision : MonoBehaviour
         for (int i = 1; i <= visionResolution; ++i)
         {
 
-            inputOneHot[i - 1] = new float[7]; // Reset the one-hot encoded vector for this ray
+            inputOneHot[i - 1] = new float[8]; // Reset the one-hot encoded vector for this ray
 
             // Calculate the angle relative to the object's rotation
             float angle = -180 + i * (360 / visionResolution);
@@ -60,35 +60,35 @@ public class Vision : MonoBehaviour
             }
             else if (hit.collider != null && hit.collider.CompareTag("Plant"))
             {
-                inputOneHot[i - 1] = new float[] { distance, angle, 1, 0, 0, 0, 0 }; // Detected a plant
+                inputOneHot[i - 1] = new float[] {Time.time, distance, angle, 1, 0, 0, 0, 0 }; // Detected a plant
             }
             else if (hit.collider != null && hit.collider.CompareTag("Cell"))
             {
                 if (transform.localScale.x - hit.collider.transform.localScale.x > 1f)
                 {
-                    inputOneHot[i - 1] = new float[] { distance, angle, 0, 1, 1, 0, 0 }; // Detected a smaller cell
+                    inputOneHot[i - 1] = new float[] {Time.time, distance, angle, 0, 1, 1, 0, 0 }; // Detected a smaller cell
                 }
                 else if (hit.collider.transform.localScale.x - transform.localScale.x > 1f)
                 {
-                    inputOneHot[i - 1] = new float[] { distance, angle, 0, 1, 0, 1, 0 }; // Detected a bigger cell
+                    inputOneHot[i - 1] = new float[] {Time.time, distance, angle, 0, 1, 0, 1, 0 }; // Detected a bigger cell
                 }
                 else
                 {
-                    inputOneHot[i - 1] = new float[] { distance, angle, 0, 1, 0, 0, 0 }; // Detected a cell of similar size
+                    inputOneHot[i - 1] = new float[] {Time.time, distance, angle, 0, 1, 0, 0, 0 }; // Detected a cell of similar size
                 }
             }
             else if (hit.collider != null && hit.collider.CompareTag("Wall"))
             {
-                inputOneHot[i - 1] = new float[] { distance, angle, 0, 0, 0, 0, 1 }; // Detected a wall
+                inputOneHot[i - 1] = new float[] {Time.time, distance, angle, 0, 0, 0, 0, 1 }; // Detected a wall
             }
             else
             {
-                inputOneHot[i - 1] = new float[] { distance, angle, 0, 0, 0, 0, 0 };
+                inputOneHot[i - 1] = new float[] {Time.time, distance, angle, 0, 0, 0, 0, 0 };
                 // Nothing detected within vision range
             }
         }
 
-        // Sned the inputOneHot to the neural network for processing
+        // Send the inputOneHot to the neural network for processing
         Brain brain = GetComponent<Brain>();
         if (brain != null)
         {
