@@ -8,7 +8,7 @@ public class Vision : MonoBehaviour
 
     [SerializeField]
     [Range(1, 360)]
-    private int visionResolution = 5; // Default resolution
+    public int visionResolution = 5; // Default resolution
 
     // Array to hold one-hot encoded inputs for each ray
     // The second dimension will be of the one hot encoded vector which will be [time, distance, rotation, plant, cell, bigger, smaller, wall]
@@ -33,7 +33,7 @@ public class Vision : MonoBehaviour
         for (int i = 1; i <= visionResolution; ++i)
         {
 
-            inputOneHot[i - 1] = new float[8]; // Reset the one-hot encoded vector for this ray
+            inputOneHot[i - 1] = new float[5]; // Reset the one-hot encoded vector for this ray
 
             // Calculate the angle relative to the object's rotation
             float angle = -180 + i * (360 / visionResolution);
@@ -46,44 +46,32 @@ public class Vision : MonoBehaviour
             // Use transform.position instead of localPosition for world space raycast
             RaycastHit2D hit = Physics2D.Raycast(transform.position, direction, visionRange * transform.localScale.x, LayerMask.GetMask("Plant"));
 
-            float distance = 0;
-
-            //TODO: Send input to the neural network
-            if (hit.collider != null)
+            if (hit.collider != null && hit.collider.CompareTag("Plant"))
             {
-                //Get distance to the detected collider
-                Collider2D collider = this.GetComponent<Collider2D>();
-                distance = Physics2D.Distance(collider, hit.collider).distance;
-
-
-
-            }
-            else if (hit.collider != null && hit.collider.CompareTag("Plant"))
-            {
-                inputOneHot[i - 1] = new float[] {Time.time, distance, angle, 1, 0, 0, 0, 0 }; // Detected a plant
+                inputOneHot[i - 1] = new float[] { 1, 0, 0, 0, 0 }; // Detected a plant
             }
             else if (hit.collider != null && hit.collider.CompareTag("Cell"))
             {
                 if (transform.localScale.x - hit.collider.transform.localScale.x > 1f)
                 {
-                    inputOneHot[i - 1] = new float[] {Time.time, distance, angle, 0, 1, 1, 0, 0 }; // Detected a smaller cell
+                    inputOneHot[i - 1] = new float[] { 0, 1, 1, 0, 0 }; // Detected a smaller cell
                 }
                 else if (hit.collider.transform.localScale.x - transform.localScale.x > 1f)
                 {
-                    inputOneHot[i - 1] = new float[] {Time.time, distance, angle, 0, 1, 0, 1, 0 }; // Detected a bigger cell
+                    inputOneHot[i - 1] = new float[] { 0, 1, 0, 1, 0 }; // Detected a bigger cell
                 }
                 else
                 {
-                    inputOneHot[i - 1] = new float[] {Time.time, distance, angle, 0, 1, 0, 0, 0 }; // Detected a cell of similar size
+                    inputOneHot[i - 1] = new float[] { 0, 1, 0, 0, 0 }; // Detected a cell of similar size
                 }
             }
             else if (hit.collider != null && hit.collider.CompareTag("Wall"))
             {
-                inputOneHot[i - 1] = new float[] {Time.time, distance, angle, 0, 0, 0, 0, 1 }; // Detected a wall
+                inputOneHot[i - 1] = new float[] { 0, 0, 0, 0, 1 }; // Detected a wall
             }
             else
             {
-                inputOneHot[i - 1] = new float[] {Time.time, distance, angle, 0, 0, 0, 0, 0 };
+                inputOneHot[i - 1] = new float[] { 0, 0, 0, 0, 0 };
                 // Nothing detected within vision range
             }
         }

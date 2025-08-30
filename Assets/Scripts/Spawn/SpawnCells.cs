@@ -28,16 +28,18 @@ public class SpawnCells : MonoBehaviour
          for (int i = 0; i < numbOfCells; i++)
         {
             if (cells.Length > 0)
-                SpawnCell(cells[i % (int)(numbOfCells * mutationRate)]);
+                if (i < 4) SpawnCell(cells[i % (int)(numbOfCells * mutationRate)], false); //Elite cells that don't mutate
+                else
+                SpawnCell(cells[i % (int)(numbOfCells * mutationRate)]); //Mutated cells
             else
-                SpawnCell();
+                SpawnCell(); //First generation of random cells
         }
     }
 
-    private void SpawnCell(Brain topCell = null)
+    private void SpawnCell(Brain topCell = null, bool mutate = true)
     {
        
-        Vector3 position = new Vector3(Random.Range(-spawnAreaSize, spawnAreaSize), Random.Range(-spawnAreaSize, spawnAreaSize), Random.Range(-spawnAreaSize, spawnAreaSize));
+        Vector3 position = new Vector3(Random.Range(-spawnAreaSize, spawnAreaSize), Random.Range(-spawnAreaSize, spawnAreaSize), 0);
 
         GameObject cell;
 
@@ -48,7 +50,7 @@ public class SpawnCells : MonoBehaviour
         {
             cell.GetComponent<Brain>().SetNeuralNet(topCell.GetNeuralNet());
             cell.GetComponent<Brain>().SetOutputLayer(topCell.GetOutputLayer());
-            cell.GetComponent<Brain>().Mutate();
+            if (mutate) cell.GetComponent<Brain>().Mutate();
         }
     }
 
@@ -67,7 +69,7 @@ public class SpawnCells : MonoBehaviour
     public Brain[] GetCells()
     {
         return Object.FindObjectsByType<Brain>(FindObjectsSortMode.None)
-            .OrderBy(go => go.transform.localScale.magnitude)
+            .OrderBy(x => x.transform.localScale.magnitude / x.GetComponent<Brain>().GetDistanceFromStart())
             .ToArray();
     }
 }

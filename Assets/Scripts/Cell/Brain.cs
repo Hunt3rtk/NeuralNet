@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 
 public class Brain : MonoBehaviour
@@ -30,10 +31,13 @@ public class Brain : MonoBehaviour
     private int depth = 3; // Number of layers in the neural network
 
     [SerializeField]
-    private float learningStep = 0.01f; // Learning rate for backpropagation
+    private float mutationVariation = 0.1f;
 
     [SerializeField]
-    private int neuronsPerLayer = 8; // Number of neurons in each layer
+    private int neuronsPerLayer = 5; // Number of neurons in each layer
+
+    [SerializeField]
+    int inputSize;
 
     [HideInInspector]
     [SerializeField]
@@ -41,8 +45,14 @@ public class Brain : MonoBehaviour
 
     private Movement movement;
 
+    private Vision vision;
+
+    private Vector3 initialposition;
+
     void Start()
     {
+
+        initialposition = transform.position;
 
         try
         {
@@ -53,6 +63,27 @@ public class Brain : MonoBehaviour
             Debug.LogError("Movement component not found: " + e.Message);
         }
 
+        try
+        {
+            vision = GetComponent<Vision>();
+        }
+        catch (System.NullReferenceException e)
+        {
+            Debug.LogError("Movement component not found: " + e.Message);
+        }
+
+        if (vision != null)
+        {
+            inputSize = vision.visionResolution * 5; // 5 is the size of the one-hot encoded vector
+        }
+        else
+        {
+            Debug.LogError("Vision component not found. Cannot determine input size.");
+            inputSize = 0; // Default to 0 or some safe value
+        }
+
+
+
         if (isInitialized) return;
 
         // Initialize the brain, e.g., load weights, biases, etc.
@@ -62,14 +93,17 @@ public class Brain : MonoBehaviour
             neuralNet[i] = new Neuron[neuronsPerLayer];
             for (int j = 0; j < neuronsPerLayer; j++)
             {
+
+                int prevLayerSize = (i == 0) ? inputSize : neuronsPerLayer;
+
                 // Randomly initialize weights and biases
-                float[] weights = new float[neuronsPerLayer];
+                float[] weights = new float[prevLayerSize];
                 for (int k = 0; k < weights.Length; k++)
                 {
-                    weights[k] = Random.Range(-1f, 1f);
+                    weights[k] = UnityEngine.Random.Range(-1f, 1f);
                 }
 
-                float bias = Random.Range(-1f, 1f);
+                float bias = UnityEngine.Random.Range(-.5f, .5f);
                 neuralNet[i][j] = new Neuron(weights, bias);
             }
         }
@@ -82,15 +116,46 @@ public class Brain : MonoBehaviour
             float[] weights = new float[neuronsPerLayer];
             for (int j = 0; j < weights.Length; j++)
             {
-                weights[j] = Random.Range(-1f, 1f);
+                weights[j] = UnityEngine.Random.Range(-1f, 1f);
             }
 
-            float bias = Random.Range(-1f, 1f);
+            float bias = UnityEngine.Random.Range(-.5f, .5f);
             outputLayer[i] = new Neuron(weights, bias);
         }
 
         isInitialized = true;
     }
+
+    /*float[] FlattenInputs(float[][] inputOneHot) {
+        int totalLength = 0;
+        for (int i = 0; i < inputOneHot.Length; i++)
+            totalLength += inputOneHot[i].Length;
+
+        float[] flat = new float[totalLength]; // +1 for size
+        int index = 0;
+        for (int i = 0; i < inputOneHot.Length; i++) {
+            for (int j = 0; j < inputOneHot[i].Length; j++) {
+                flat[index++] = inputOneHot[i][j];
+            }
+        }
+        return flat;
+    }*/
+
+    /*public void InitializeForwardPass(float[][] inputOneHot) {
+        float[] flatInput = FlattenInputs(inputOneHot);
+
+        float[] firstLayerOutput = new float[neuronsPerLayer];
+        for (int i = 0; i < neuronsPerLayer; i++) {
+            float sum = 0f;
+            for (int j = 0; j < flatInput.Length; j++) {
+                sum += flatInput[j] * neuralNet[0][i].weights[j];
+            }
+            sum += neuralNet[0][i].bias;
+            firstLayerOutput[i] = ReLU(sum);
+        }
+
+        OutputResults(ForwardPass(firstLayerOutput));
+    }*/
 
     public void InitializeForwardPass(float[][] inputOneHot)
     {
@@ -98,13 +163,10 @@ public class Brain : MonoBehaviour
         float[] output = new float[neuralNet.Length];
         for (int i = 0; i < neuralNet.Length; i++)
         {
-
-
             // Looping over each input vector and the values in the vector
             //Summing the weighted and biased values in the input vector
             //Then summing them all together to get one vector or a value per neuron
             float[] sum = new float[neuronsPerLayer];
-
             for (int j = 0; j < inputOneHot.Length; j++)
             {
                 for (int k = 0; k < inputOneHot[j].Length; k++)
@@ -120,32 +182,30 @@ public class Brain : MonoBehaviour
         OutputResults(ForwardPass(output));
     }
 
-    private float[] ForwardPass(float[] input)
+    private float[] ForwardPass(float[] input, byte depthCount = 1)
     {
         // We take the each input and pass it through each neuron in the next layer
         // This neuron takes the input and multiplies it by the weight, adds the bias, and applies ReLU activation
 
-        float[][] output = new float[depth][];
-
         // Looping over each layer and neuron in each layer
-        for (int i = 1; i < depth; i++)
+        if (depthCount >= depth) return input;
+
+        float[] output = new float[neuronsPerLayer];
+
+        for (int j = 0; j < neuronsPerLayer; j++)
         {
-            output[i] = new float[neuronsPerLayer];
-            for (int j = 0; j < neuronsPerLayer; j++)
+            // Looping over each input
+            //Summing the weighted and biased values in the input
+            //Then summing them all together to get one value per neuron
+            float[] sum = new float[neuronsPerLayer];
+            for (int k = 0; k < input.Length; k++)
             {
-                // Looping over each input
-                //Summing the weighted and biased values in the input
-                //Then summing them all together to get one value per neuron
-                float[] sum = new float[neuronsPerLayer];
-                for (int k = 0; k < input.Length; k++)
-                {
-                    sum[j] += input[k] * neuralNet[i][j].weights[k];
-                }
-                sum[j] += neuralNet[i][j].bias;
-                output[i][j] = ReLU(sum[j]);
+                sum[j] += input[k] * neuralNet[depthCount][j].weights[k];
             }
+            sum[j] += neuralNet[depthCount][j].bias;
+            output[j] = ReLU(sum[j]);
         }
-        return output[depth - 1];
+        return ForwardPass(output, ++depthCount);
     }
 
     private void OutputResults(float[] lastInput)
@@ -160,8 +220,11 @@ public class Brain : MonoBehaviour
                 sum += lastInput[j] * outputLayer[i].weights[j];
             }
             sum += outputLayer[i].bias;
-            output[i] = ReLU(sum);
+            output[i] = sum;
         }
+
+        if (output[0] <= .3f && output[0] >= -.3f) output[0] = 0;
+        if (output[1] <= .3f && output[1] >= -.3f) output[1] = 0;
 
         // Process the output from the neural network
         // For example, you can use the output to control movement or other actions
@@ -185,10 +248,10 @@ public class Brain : MonoBehaviour
                 // Randomly initialize weights and biases
                 for (int k = 0; k < neuralNet[i][j].weights.Length; k++)
                 {
-                    neuralNet[i][j].weights[k] += Random.Range(-.5f, .5f);
+                    neuralNet[i][j].weights[k] += UnityEngine.Random.Range(-mutationVariation, mutationVariation);
                 }
 
-                neuralNet[i][j].bias += Random.Range(-.5f, .5f);
+                neuralNet[i][j].bias += UnityEngine.Random.Range(-mutationVariation, mutationVariation);
             }
         }
 
@@ -199,11 +262,16 @@ public class Brain : MonoBehaviour
             // Randomly initialize weights and biases for the output layer
             for (int j = 0; j < outputLayer[i].weights.Length; j++)
             {
-                outputLayer[i].weights[j] += Random.Range(-.5f, .5f);   
+                outputLayer[i].weights[j] += UnityEngine.Random.Range(-mutationVariation, mutationVariation);   
             }
 
-            outputLayer[i].bias +=  Random.Range(-.5f, .5f);
+            outputLayer[i].bias +=  UnityEngine.Random.Range(-mutationVariation, mutationVariation);
         }
+    }
+
+    public float GetDistanceFromStart()
+    {
+        return Vector3.Distance(initialposition, transform.position);
     }
 
     public Neuron[][] GetNeuralNet()

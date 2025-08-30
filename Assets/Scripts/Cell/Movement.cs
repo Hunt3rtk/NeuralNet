@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using static UnityEngine.InputSystem.InputAction;
@@ -22,6 +23,7 @@ public class Movement : MonoBehaviour
 
     public void Move(Vector2 direction)
     {
-        moveDirection = direction.normalized;
+        direction = new Vector2(Math.Clamp(direction.x, -1f, 1f), Math.Clamp(direction.y, -1f, 1f));
+        moveDirection = direction;
     }
 }

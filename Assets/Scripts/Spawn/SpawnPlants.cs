@@ -40,7 +40,7 @@ public class SpawnPlants : MonoBehaviour
 
     private void SpawnPlant()
     {
-        Vector3 position = new Vector3(Random.Range(-spawnAreaSize, spawnAreaSize), Random.Range(-spawnAreaSize, spawnAreaSize), Random.Range(-spawnAreaSize, spawnAreaSize));
+        Vector3 position = new Vector3(Random.Range(-spawnAreaSize, spawnAreaSize), Random.Range(-spawnAreaSize, spawnAreaSize), 0);
         Instantiate(plantPrefab, position, Quaternion.identity);
     }
 

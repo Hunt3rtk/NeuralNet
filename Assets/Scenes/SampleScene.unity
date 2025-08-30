@@ -636,7 +636,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   numberOfPlants: 1000
-  spawnAreaSize: 70
+  spawnAreaSize: 100
   plantPrefab: {fileID: 915514141788703981, guid: 031acbab7afd52144b2ec0e59a0978c8, type: 3}
 --- !u!114 &1989454965
 MonoBehaviour:
@@ -651,8 +651,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   numbOfCells: 50
-  spawnAreaSize: 50
-  mutationRate: 0.1
+  spawnAreaSize: 100
+  mutationRate: 0.3
   cellPrefab: {fileID: 463484581419805721, guid: 5ffa848291f0f554da1acd99a08d3196, type: 3}
 --- !u!114 &1989454966
 MonoBehaviour:
@@ -943,7 +943,7 @@ Camera:
   far clip plane: 1000
   field of view: 34
   orthographic: 1
-  orthographic size: 52
+  orthographic size: 100
   m_Depth: -1
   m_CullingMask:
     serializedVersion: 2
