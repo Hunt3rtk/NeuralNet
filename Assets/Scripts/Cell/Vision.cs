@@ -18,6 +18,8 @@ public class Vision : MonoBehaviour
 
     private int tickCount = 0;
 
+    private int oneHotLength = 3; // Size of the one-hot encoded vector
+
     void Start()
     {
         inputOneHot = new float[visionResolution][];
@@ -33,7 +35,7 @@ public class Vision : MonoBehaviour
         for (int i = 1; i <= visionResolution; ++i)
         {
 
-            inputOneHot[i - 1] = new float[5]; // Reset the one-hot encoded vector for this ray
+            inputOneHot[i - 1] = new float[oneHotLength]; // Reset the one-hot encoded vector for this ray
 
             // Calculate the angle relative to the object's rotation
             float angle = -180 + i * (360 / visionResolution);
@@ -48,30 +50,30 @@ public class Vision : MonoBehaviour
 
             if (hit.collider != null && hit.collider.CompareTag("Plant"))
             {
-                inputOneHot[i - 1] = new float[] { 1, 0, 0, 0, 0 }; // Detected a plant
+                inputOneHot[i - 1] = new float[] {1, direction.x, direction.y}; // Detected a plant
             }
             else if (hit.collider != null && hit.collider.CompareTag("Cell"))
             {
                 if (transform.localScale.x - hit.collider.transform.localScale.x > 1f)
                 {
-                    inputOneHot[i - 1] = new float[] { 0, 1, 1, 0, 0 }; // Detected a smaller cell
+                    inputOneHot[i - 1] = new float[] {1, direction.x, direction.y}; // Detected a smaller cell
                 }
                 else if (hit.collider.transform.localScale.x - transform.localScale.x > 1f)
                 {
-                    inputOneHot[i - 1] = new float[] { 0, 1, 0, 1, 0 }; // Detected a bigger cell
+                    inputOneHot[i - 1] = new float[] {-1, direction.x, direction.y}; // Detected a bigger cell
                 }
                 else
                 {
-                    inputOneHot[i - 1] = new float[] { 0, 1, 0, 0, 0 }; // Detected a cell of similar size
+                    inputOneHot[i - 1] = new float[] {0, direction.x, direction.y}; // Detected a cell of similar size
                 }
             }
             else if (hit.collider != null && hit.collider.CompareTag("Wall"))
             {
-                inputOneHot[i - 1] = new float[] { 0, 0, 0, 0, 1 }; // Detected a wall
+                inputOneHot[i - 1] = new float[] {-1, direction.x, direction.y}; // Detected a wall
             }
             else
             {
-                inputOneHot[i - 1] = new float[] { 0, 0, 0, 0, 0 };
+                inputOneHot[i - 1] = new float[] {0, direction.x, direction.y};
                 // Nothing detected within vision range
             }
         }
@@ -88,18 +90,23 @@ public class Vision : MonoBehaviour
             Debug.LogWarning("Brain component not found on the GameObject.");
         }
     }
+    
+    public int GetInputSize()
+    {
+        return visionResolution * oneHotLength; // 3 is the size of the one-hot encoded vector
+    }
 
     private void OnDrawGizmos()
-    { 
+    {
         // Get the object's rotation in radians
         float objectRotation = transform.eulerAngles.z * Mathf.Deg2Rad;
 
-        
+
         float rayLength = visionRange * transform.localScale.x;
 
         // Optional: Draw all rays for better visualization
         Gizmos.color = Color.yellow;
-        for (float i = -180; i <= 180; i += 360/visionResolution)
+        for (float i = -180; i <= 180; i += 360 / visionResolution)
         {
             float relativeAngle = i * Mathf.Deg2Rad;
             float worldAngle = objectRotation + relativeAngle;

@@ -74,7 +74,7 @@ public class Brain : MonoBehaviour
 
         if (vision != null)
         {
-            inputSize = vision.visionResolution * 5; // 5 is the size of the one-hot encoded vector
+            inputSize = vision.GetInputSize();
         }
         else
         {
@@ -126,54 +126,20 @@ public class Brain : MonoBehaviour
         isInitialized = true;
     }
 
-    /*float[] FlattenInputs(float[][] inputOneHot) {
-        int totalLength = 0;
-        for (int i = 0; i < inputOneHot.Length; i++)
-            totalLength += inputOneHot[i].Length;
-
-        float[] flat = new float[totalLength]; // +1 for size
-        int index = 0;
-        for (int i = 0; i < inputOneHot.Length; i++) {
-            for (int j = 0; j < inputOneHot[i].Length; j++) {
-                flat[index++] = inputOneHot[i][j];
-            }
-        }
-        return flat;
-    }*/
-
-    /*public void InitializeForwardPass(float[][] inputOneHot) {
-        float[] flatInput = FlattenInputs(inputOneHot);
-
-        float[] firstLayerOutput = new float[neuronsPerLayer];
-        for (int i = 0; i < neuronsPerLayer; i++) {
-            float sum = 0f;
-            for (int j = 0; j < flatInput.Length; j++) {
-                sum += flatInput[j] * neuralNet[0][i].weights[j];
-            }
-            sum += neuralNet[0][i].bias;
-            firstLayerOutput[i] = ReLU(sum);
-        }
-
-        OutputResults(ForwardPass(firstLayerOutput));
-    }*/
-
     public void InitializeForwardPass(float[][] inputOneHot)
     {
 
-        float[] output = new float[neuralNet.Length];
-        for (int i = 0; i < neuralNet.Length; i++)
+        if (isInitialized == false) return;
+
+        float[] output = new float[neuronsPerLayer];
+        for (int i = 0; i < neuronsPerLayer; i++)
         {
-            // Looping over each input vector and the values in the vector
-            //Summing the weighted and biased values in the input vector
-            //Then summing them all together to get one vector or a value per neuron
+            // Looping over each input
             float[] sum = new float[neuronsPerLayer];
-            for (int j = 0; j < inputOneHot.Length; j++)
+            for (int k = 0; k < inputOneHot[i].Length; k++)
             {
-                for (int k = 0; k < inputOneHot[j].Length; k++)
-                {
-                    // Assuming inputOneHot[k] is a one-hot encoded vector
-                    sum[i] += inputOneHot[j][k] * neuralNet[0][i].weights[k];
-                }
+                // Assuming inputOneHot[k] is a one-hot encoded vector
+                sum[i] += inputOneHot[i][k] * neuralNet[0][i].weights[k];
             }
             sum[i] += neuralNet[0][i].bias;
             output[i] = ReLU(sum[i]);
