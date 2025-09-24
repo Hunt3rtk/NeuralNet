@@ -20,17 +20,16 @@ public class SpawnCells : MonoBehaviour
     [SerializeField]
     private GameObject cellPrefab;
 
+    private Brain[] cells;
+
     public void SpawnMultipleCells()
     {
-
-        Brain[] cells = GetCells();
-
-         for (int i = 0; i < numbOfCells; i++)
+        for (int i = 0; i < numbOfCells; i++)
         {
             if (cells.Length > 0)
                 if (i < 4) SpawnCell(cells[i % (int)(numbOfCells * mutationRate)], false); //Elite cells that don't mutate
                 else
-                SpawnCell(cells[i % (int)(numbOfCells * mutationRate)]); //Mutated cells
+                    SpawnCell(cells[i % (int)(numbOfCells * mutationRate)]); //Mutated cells
             else
                 SpawnCell(); //First generation of random cells
         }
@@ -38,7 +37,6 @@ public class SpawnCells : MonoBehaviour
 
     private void SpawnCell(Brain topCell = null, bool mutate = true)
     {
-       
         Vector3 position = new Vector3(Random.Range(-spawnAreaSize, spawnAreaSize), Random.Range(-spawnAreaSize, spawnAreaSize), 0);
 
         GameObject cell;
@@ -56,7 +54,8 @@ public class SpawnCells : MonoBehaviour
 
     public void DestroyCells()
     {
-        Brain[] cells = GetCells();
+        SetCells();
+
         foreach (Brain cell in cells)
         {
             if (cell != null)
@@ -68,8 +67,17 @@ public class SpawnCells : MonoBehaviour
 
     public Brain[] GetCells()
     {
-        return Object.FindObjectsByType<Brain>(FindObjectsSortMode.None)
-            .OrderBy(x => x.transform.localScale.magnitude / x.GetComponent<Brain>().GetDistanceFromStart())
+        return cells;
+    }
+
+    public Brain[] SetCells()
+    {
+        if (Object.FindObjectsByType<Brain>(FindObjectsSortMode.None).Length == 0) return new Brain[0];
+
+        cells = Object.FindObjectsByType<Brain>(FindObjectsSortMode.None)
+            .OrderBy(x => x.transform.localScale.x / x.GetComponent<Brain>().GetDistanceFromStart())
             .ToArray();
+
+        return cells;
     }
 }

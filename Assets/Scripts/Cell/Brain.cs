@@ -126,7 +126,7 @@ public class Brain : MonoBehaviour
         isInitialized = true;
     }
 
-    public void InitializeForwardPass(float[][] inputOneHot)
+    public void InitializeForwardPass(float[] inputOneHot)
     {
 
         if (isInitialized == false) return;
@@ -136,10 +136,10 @@ public class Brain : MonoBehaviour
         {
             // Looping over each input
             float[] sum = new float[neuronsPerLayer];
-            for (int k = 0; k < inputOneHot[i].Length; k++)
+            for (int k = 0; k < inputOneHot.Length; k++)
             {
                 // Assuming inputOneHot[k] is a one-hot encoded vector
-                sum[i] += inputOneHot[i][k] * neuralNet[0][i].weights[k];
+                sum[i] += inputOneHot[k] * neuralNet[0][i].weights[k];
             }
             sum[i] += neuralNet[0][i].bias;
             output[i] = ReLU(sum[i]);
@@ -207,9 +207,9 @@ public class Brain : MonoBehaviour
 
     public void Mutate()
     {  
-        for (int i = 0; i < depth; i++)
+        for (int i = 0; i < neuralNet.Length; i++)
         {
-            for (int j = 0; j < neuronsPerLayer; j++)
+            for (int j = 0; j < neuralNet[i].Length; j++)
             {
                 // Randomly initialize weights and biases
                 for (int k = 0; k < neuralNet[i][j].weights.Length; k++)

@@ -285,7 +285,7 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 150, y: 0, z: 0}
-  m_LocalScale: {x: 100, y: 110, z: 100}
+  m_LocalScale: {x: 100, y: 350, z: 100}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
@@ -418,8 +418,8 @@ Transform:
   m_GameObject: {fileID: 1392993537}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: -100, z: 0}
-  m_LocalScale: {x: 200, y: 100, z: 100}
+  m_LocalPosition: {x: 0, y: -150, z: 0}
+  m_LocalScale: {x: 400, y: 100, z: 100}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
@@ -552,8 +552,8 @@ Transform:
   m_GameObject: {fileID: 1730705520}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 100, z: 0}
-  m_LocalScale: {x: 200, y: 100, z: 100}
+  m_LocalPosition: {x: 0, y: 150, z: 0}
+  m_LocalScale: {x: 400, y: 100, z: 100}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
@@ -635,7 +635,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 04626467a7d27b1489b397d8d6459c68, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  numberOfPlants: 1000
+  numberOfPlants: 500
   spawnAreaSize: 100
   plantPrefab: {fileID: 915514141788703981, guid: 031acbab7afd52144b2ec0e59a0978c8, type: 3}
 --- !u!114 &1989454965
@@ -650,9 +650,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d86a1c85b52b70c43bdec2b668583e5d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  numbOfCells: 50
+  numbOfCells: 200
   spawnAreaSize: 100
-  mutationRate: 0.3
+  mutationRate: 0.1
   cellPrefab: {fileID: 463484581419805721, guid: 5ffa848291f0f554da1acd99a08d3196, type: 3}
 --- !u!114 &1989454966
 MonoBehaviour:
@@ -666,7 +666,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1a485a0746d2af84499daa05126fc75f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  generationTime: 120
+  generationTime: 30
   currentGeneration: 0
 --- !u!4 &1989454967
 Transform:
@@ -767,7 +767,7 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: -150, y: 0, z: 0}
-  m_LocalScale: {x: 100, y: 110, z: 100}
+  m_LocalScale: {x: 100, y: 350, z: 100}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
@@ -943,7 +943,7 @@ Camera:
   far clip plane: 1000
   field of view: 34
   orthographic: 1
-  orthographic size: 100
+  orthographic size: 110
   m_Depth: -1
   m_CullingMask:
     serializedVersion: 2

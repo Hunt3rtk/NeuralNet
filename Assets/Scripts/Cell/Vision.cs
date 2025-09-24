@@ -14,7 +14,7 @@ public class Vision : MonoBehaviour
     // The second dimension will be of the one hot encoded vector which will be [time, distance, rotation, plant, cell, bigger, smaller, wall]
     [HideInInspector]
     [SerializeField]
-    private float[][] inputOneHot;
+    private float[] inputOneHot;
 
     private int tickCount = 0;
 
@@ -22,7 +22,7 @@ public class Vision : MonoBehaviour
 
     void Start()
     {
-        inputOneHot = new float[visionResolution][];
+        inputOneHot = new float[oneHotLength];
     }
 
     // Update is called once per frame
@@ -34,8 +34,6 @@ public class Vision : MonoBehaviour
 
         for (int i = 1; i <= visionResolution; ++i)
         {
-
-            inputOneHot[i - 1] = new float[oneHotLength]; // Reset the one-hot encoded vector for this ray
 
             // Calculate the angle relative to the object's rotation
             float angle = -180 + i * (360 / visionResolution);
@@ -50,30 +48,30 @@ public class Vision : MonoBehaviour
 
             if (hit.collider != null && hit.collider.CompareTag("Plant"))
             {
-                inputOneHot[i - 1] = new float[] {1, direction.x, direction.y}; // Detected a plant
+                inputOneHot = new float[] {1, direction.x, direction.y}; // Detected a plant
             }
-            else if (hit.collider != null && hit.collider.CompareTag("Cell"))
+            else if (hit.collider != null && hit.collider.CompareTag("Cell") && inputOneHot != new float[] {1, direction.x, direction.y}) // Prioritize plants over cells
             {
                 if (transform.localScale.x - hit.collider.transform.localScale.x > 1f)
                 {
-                    inputOneHot[i - 1] = new float[] {1, direction.x, direction.y}; // Detected a smaller cell
+                    inputOneHot = new float[] {1, direction.x, direction.y}; // Detected a smaller cell
                 }
                 else if (hit.collider.transform.localScale.x - transform.localScale.x > 1f)
                 {
-                    inputOneHot[i - 1] = new float[] {-1, direction.x, direction.y}; // Detected a bigger cell
+                    inputOneHot = new float[] {-1, direction.x, direction.y}; // Detected a bigger cell
                 }
                 else
                 {
-                    inputOneHot[i - 1] = new float[] {0, direction.x, direction.y}; // Detected a cell of similar size
+                    inputOneHot = new float[] {0, direction.x, direction.y}; // Detected a cell of similar size
                 }
             }
-            else if (hit.collider != null && hit.collider.CompareTag("Wall"))
+            else if (hit.collider != null && hit.collider.CompareTag("Wall") && inputOneHot != new float[] {1, direction.x, direction.y} && inputOneHot != new float[] {-1, direction.x, direction.y})
             {
-                inputOneHot[i - 1] = new float[] {-1, direction.x, direction.y}; // Detected a wall
+                inputOneHot = new float[] {-1, direction.x, direction.y}; // Detected a wall
             }
             else
             {
-                inputOneHot[i - 1] = new float[] {0, direction.x, direction.y};
+                inputOneHot = new float[] {0, direction.x, direction.y};
                 // Nothing detected within vision range
             }
         }
@@ -93,7 +91,7 @@ public class Vision : MonoBehaviour
     
     public int GetInputSize()
     {
-        return visionResolution * oneHotLength; // 3 is the size of the one-hot encoded vector
+        return oneHotLength; // 3 is the size of the one-hot encoded vector
     }
 
     private void OnDrawGizmos()
